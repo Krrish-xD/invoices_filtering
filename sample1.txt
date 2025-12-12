@@ -1,0 +1,140 @@
+Skip to content
+Invoices
+1RJXXWRK-0009
+Void
+Billed to Cardinal Financial Company Limited Partnership · $10,000.00
+https://invoice.stripe.com/i/acct_1PL7io02CU681TVB/live_YWNjdF8xUEw3aW8wMkNVNjgxVFZCLF9UUEdzdUVXdU9kN256T1dVcG4wbXliN2NlWkFkQ1lwLDE1NTgyNjg4Ng0200oM3Dm7qB?s=db
+Download PDF
+Recent activity
+Invoice was voided
+Nov 25, 2025, 6:42 PM
+Invoice was finalized
+Nov 11, 2025, 4:54 PM
+Invoice payment page was created
+Summary
+Billed to
+Cardinal Financial Company Limited Partnership
+accounts.payable@sebonic.com
+Billing details
+—
+Invoice number
+1RJXXWRK-0009
+Currency
+USD - US Dollar
+Due date
+Dec 11, 4:54 PM
+Billing method
+Send invoice
+Memo
+Tax calculation
+No tax rate applied
+Description
+Qty
+Unit price
+Amount
+1 × Tier 1: Core Voice (at $10,000.00 / month)
+Aug 21 - Sep 21, 2025
+1
+$10,000.00
+$10,000.00
+Subtotal
+$10,000.00
+Total excluding tax
+$10,000.00
+Tax
+-
+Total
+$10,000.00
+Amount paid
+$0.00
+Amount remaining
+$10,000.00
+Tax calculation
+No tax rate applied.
+Learn how to calculate tax automatically on all your future invoices.
+Accounting
+Use Revenue Recognition to automate accrual accounting for invoices.
+
+Go to Revenue Recognition
+Payments
+Amount
+​
+​
+Description
+Date
+$10,000.00
+USD
+Canceled
+Payment for Invoice
+Nov 11, 4:54 PM
+Credit notes
+No credit notes
+When you add credit notes on this invoice, they will appear here.
+Logs
+POST /v1/invoices/in_1SSSKO02CU681TVB7mFbg0U9/void
+200 OK
+11/25/25, 6:42:49 PM
+POST /v1/invoices/in_1SSSKO02CU681TVB7mFbg0U9/finalize
+200 OK
+11/11/25, 4:54:35 PM
+POST /v1/invoiceitems
+200 OK
+11/11/25, 4:54:28 PM
+POST /v1/invoices
+200 OK
+11/11/25, 4:54:28 PM
+Events
+A payment pi_3SSSKV02CU681TVB1iUMbfdb for $10,000.00 was canceled
+11/25/25, 6:42:50 PM
+accounts.payable@sebonic.com's invoice 1RJXXWRK-0009 was voided
+11/25/25, 6:42:49 PM
+accounts.payable@sebonic.com's invoice has changed
+11/25/25, 6:42:49 PM
+A draft invoice for $10,000.00 to accounts.payable@sebonic.com was finalized
+11/11/25, 4:54:36 PM
+accounts.payable@sebonic.com's invoice has changed
+11/11/25, 4:54:36 PM
+A new payment pi_3SSSKV02CU681TVB1iUMbfdb for $10,000.00 was created
+11/11/25, 4:54:35 PM
+accounts.payable@sebonic.com's invoice has changed
+11/11/25, 4:54:28 PM
+An invoice item for $10,000.00 was created for ii_1SSSKO02CU681TVBk91geKgu
+11/11/25, 4:54:28 PM
+A draft invoice was created
+11/11/25, 4:54:28 PM
+Details
+ID
+in_1SSSKO02CU681TVB7mFbg0U9
+Created
+Nov 11, 4:54 PM
+Finalized
+Nov 11, 4:54 PM
+Payment page
+https://invoice.stripe.com/i/acct_1PL7io02CU681TVB/live_YWNjdF8xUEw3aW8wMkNVNjgxVFZCLF9UUEdzdUVXdU9kN256T1dVcG4wbXliN2NlWkFkQ1lwLDE1NTgyNjg4Ng0200oM3Dm7qB?s=db
+Enabled payment methods
+Credit or debit card
+ACH direct debit
+Metadata
+No metadata
+Navigated to Invoices – Kastle AI – Stripe
+
+Kastle AI
+Home
+Balances
+Transactions
+Customers
+Product catalog
+Shortcuts
+Reports
+Invoices
+Products
+Payments
+Billing
+Reporting
+More
+Search
+Test mode
+
+Developers
+in_1SSSKO02CU681TVB7...
+Notifications
