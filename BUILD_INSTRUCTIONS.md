@@ -16,7 +16,7 @@ Since this project was developed in a Linux environment, you need to build the f
 2.  Run the following command:
 
     ```powershell
-    pyinstaller --noconfirm --onefile --windowed --name "InvoiceAutomator" --add-data "config.json;." gui_launcher.py
+    pyinstaller --noconfirm --onefile --windowed --name "InvoiceAutomator" gui_launcher.py
     ```
 
     *   `--onefile`: Bundles everything into a single `.exe` file.

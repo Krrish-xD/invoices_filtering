@@ -64,14 +64,18 @@ def run_automation_logic(row_count, logger=print):
 
     # 4. Extraction Loop
     logger("\n--- Starting Extraction Loop (Reverse Order) ---")
-    logger("Navigating to last tab...")
-    
-    # Move to the last opened tab (Reverse navigation)
-    pyautogui.hotkey('ctrl', 'shift', 'tab')
+    # Move to the first tab (Forward navigation)
+    logger("Navigating to first tab...")
+    pyautogui.hotkey('ctrl', 'tab')
+    time.sleep(0.8) # Pause after moving to new tab
     
     collected_data = []
     seen_content_set = set() # Global de-duplication
     tab_index = 0
+    
+    # Safety: Ensure we don't stop immediately if the first tab resembles the original
+    # or if we haven't actually moved yet.
+    has_moved_past_start = False
 
     while True:
         tab_index += 1
@@ -80,35 +84,63 @@ def run_automation_logic(row_count, logger=print):
         # A. Wait for content
         time.sleep(PAGE_LOAD_WAIT)
 
-        # B. Copy Content
-        pyautogui.hotkey('ctrl', 'a')
-        time.sleep(0.5) 
-        pyautogui.hotkey('ctrl', 'c')
-        time.sleep(0.5)
+        # B. Copy Content (With Retry Logic)
+        def capture_content():
+            pyautogui.hotkey('ctrl', 'a')
+            time.sleep(0.5) 
+            pyautogui.hotkey('ctrl', 'c')
+            time.sleep(0.5)
+            return pyperclip.paste().strip()
 
-        # C. Get Text
-        current_content = pyperclip.paste().strip()
+        current_content = capture_content()
+
+        # RETRY MECHANISM for blank pages
+        if not current_content:
+            logger("  -> Page seems blank/loading. Waiting extra 2.5s...")
+            time.sleep(2.5)
+            current_content = capture_content()
+            if not current_content:
+                logger("  -> Still blank. Skipping this tab (might be not loaded).")
+                # We don't break, we just move on.
+                # But we should be careful not to trigger "Stop Condition" on a blank page if orig_pg wasn't blank.
 
         # D. STOP CONDITION: Check if we are back at the original page
-        if current_content == orig_pg:
-            logger(">> LOOP COMPLETE: Returned to original page.")
-            break
+        # We only check this if we are confident we have processed at least one unique tab 
+        # OR if we've gone through enough tabs (sanity check).
+        # But primarily, we check if content matches orig_pg.
         
-        # E. DE-DUPLICATION: Check against ALL previously seen content
+        is_original_page = (current_content == orig_pg)
+        
+        if is_original_page:
+            if not has_moved_past_start:
+                 # We are still seeing the original page content? 
+                 # Maybe the Ctrl+Tab didn't register? Or the first tab is a duplicate of the list?
+                 # We'll treat it as a duplicate for now but WON'T stop the loop yet.
+                 logger("  -> Content matches Original Page, but strictly inside first few checks. Continuing...")
+            else:
+                logger(">> LOOP COMPLETE: Returned to original page.")
+                break
+        else:
+            # If we see content that is DIFFERENT from original, we mark that we have successfully left the start.
+            has_moved_past_start = True
+        
+        # E. DE-DUPLICATION
         if current_content in seen_content_set:
             logger("  -> Duplicate found (Seen before). Skipping.")
         else:
-            # Mark as seen
-            seen_content_set.add(current_content)
-            
-            # Parse and Store
-            parsed_data = parse_invoice_text(current_content)
-            collected_data.append(parsed_data)
-            inv_num = parsed_data.get('invoice_number', 'Unknown')
-            logger(f"  -> Extracted: {inv_num}")
+            # Mark as seen (Only if it's valid content)
+            if current_content:
+                seen_content_set.add(current_content)
+                
+                # Parse and Store
+                parsed_data = parse_invoice_text(current_content)
+                collected_data.append(parsed_data)
+                inv_num = parsed_data.get('invoice_number', 'Unknown')
+                logger(f"  -> Extracted: {inv_num}")
 
-        # F. Navigate Reverse (Previous Tab)
-        pyautogui.hotkey('ctrl', 'shift', 'tab')
+        # F. Navigate Forward (Next Tab)
+        pyautogui.hotkey('ctrl', 'tab')
+        time.sleep(0.8) # Pause after moving to new tab
 
     # 5. Save Results
     if collected_data:

@@ -66,11 +66,7 @@ def perform_clicks(num_clicks=23):
 
     print(f"--- Clicking Automation Starting ---")
     print(f"Randomized session X-center for all clicks: {randomized_session_center_x:.2f}")
-    print(f"Starting {num_clicks} clicks in 5 seconds...")
-    for i in range(5, 0, -1):
-        print(f"{i}...", end="", flush=True)
-        time.sleep(1)
-    print(" Go!")
+    print(f"Performing {num_clicks} clicks now...")
 
     for i in range(num_clicks):
         # Calculate mean coordinates for this row
