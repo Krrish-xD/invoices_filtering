@@ -13,7 +13,7 @@ def get_mouse_position(prompt):
     print(f"Captured: ({x}, {y})")
     return x, y
 
-def main():
+def run_setup_wizard():
     print("--- Invoice Scraper Setup Wizard ---")
     print("This setup will configure the click coordinates.")
     
@@ -27,24 +27,20 @@ def main():
     vertical_spacing = abs(end_y - start_y)
     print(f"\nCalculated vertical spacing: {vertical_spacing} pixels")
     
-    # 3. Get Row Count
-    while True:
-        try:
-            val = input("\nStep 3: Enter the default number of rows to process (e.g., 20): ").strip()
-            row_count = int(val)
-            break
-        except ValueError:
-            print("Invalid input. Please enter a number.")
-            
+    # Load existing config to preserve other settings like row_count or file path
+    current_config = load_config()
+    
     config = {
         "start_x": start_x,
         "start_y": start_y,
         "vertical_spacing": vertical_spacing,
-        "row_count": row_count
+        "row_count": current_config.get("row_count", 20),
+        "extra_file_path": current_config.get("extra_file_path", "")
     }
     
     save_config(config)
-    print("\nSetup complete! You can now run 'python automation.py'.")
+    print("\nCoordinates saved!")
+    return config
 
 if __name__ == "__main__":
-    main()
+    run_setup_wizard()

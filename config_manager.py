@@ -7,7 +7,8 @@ DEFAULT_CONFIG = {
     "start_x": 0,
     "start_y": 0,
     "vertical_spacing": 23.5,
-    "row_count": 20
+    "row_count": 20,
+    "extra_file_path": ""
 }
 
 def load_config():
@@ -15,7 +16,12 @@ def load_config():
         return DEFAULT_CONFIG
     try:
         with open(CONFIG_FILE, "r") as f:
-            return json.load(f)
+            config = json.load(f)
+            # Ensure all default keys exist (for backward compatibility)
+            for key, val in DEFAULT_CONFIG.items():
+                if key not in config:
+                    config[key] = val
+            return config
     except Exception as e:
         print(f"Error loading config: {e}")
         return DEFAULT_CONFIG
