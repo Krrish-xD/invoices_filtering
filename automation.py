@@ -1,5 +1,6 @@
 import time
 import os
+import math
 import tkinter as tk
 from tkinter import messagebox
 import pyautogui
@@ -19,7 +20,7 @@ def get_row_count():
     root = tk.Tk()
     root.title("Invoice Automation Tool")
     
-    # Set window size (Width x Height) - Wider as requested
+    # Set window size (Width x Height)
     root.geometry("550x350")
     
     # Variable to store the result
@@ -42,16 +43,17 @@ def get_row_count():
 
     root.protocol("WM_DELETE_WINDOW", on_close)
 
-    # Main container frame with 7mm-ish padding (approx 25px)
+    # Main container frame
     main_frame = tk.Frame(root, padx=25, pady=25)
     main_frame.pack(fill="both", expand=True)
 
     # 1. Description Label
     desc_text = (
-        "AUTOMATED INVOICE SCRAPER V1.0\n\n"
-        "This tool automates the extraction of invoice data.\n"
-        "It will click through rows, open tabs, and scrape details.\n\n"
-        "Please ensure your browser is open to the list view."
+        "AUTOMATED INVOICE SCRAPER V1.1\n\n"
+        "1. Enter number of rows.\n"
+        "2. Script will click rows + 15% extra.\n"
+        "3. Scrapes tabs until returning to original page.\n\n"
+        "Ensure browser is open to the list view."
     )
     lbl_desc = tk.Label(main_frame, text=desc_text, justify="center", font=("Helvetica", 11), pady=10)
     lbl_desc.pack(fill="x")
@@ -66,26 +68,21 @@ def get_row_count():
     entry = tk.Entry(frame_input, width=10, font=("Helvetica", 11))
     entry.insert(0, "20") # Default value
     entry.pack(side="left", padx=10)
-    entry.bind('<Return>', on_submit) # Allow pressing Enter key
+    entry.bind('<Return>', on_submit) 
     entry.focus_set()
 
-    # 3. Start Button - FIXED HEIGHT
-    # Removed ipady from constructor, applied it via pack()
+    # 3. Start Button
     btn_start = tk.Button(main_frame, text="START AUTOMATION", command=on_submit, 
                           bg="#4CAF50", fg="white", font=("Helvetica", 12, "bold"), 
                           cursor="hand2", width=20) 
-    # Use ipady here to increase vertical size internally
     btn_start.pack(pady=10, ipady=10)
 
-    # Center the window on screen
     root.eval('tk::PlaceWindow . center')
-
     root.mainloop()
     return result["count"]
 
 def save_data(all_data):
     """Saves the collected data blocks to the CSV file."""
-    # Convert all parsed data dictionaries to the formatted CSV blocks
     csv_content = ""
     for data in all_data:
         csv_content += format_to_csv_block(data) + "\n"
@@ -102,63 +99,83 @@ def main():
         print("Operation cancelled.")
         return
 
-    print(f"Preparing to process {row_count} rows.")
+    # Calculate clicks (Rows + 15%)
+    click_count = math.ceil(row_count * 1.15)
+    print(f"Target Rows: {row_count} | Performing {click_count} clicks (+15% buffer)")
 
-    # 2. Perform Clicks (Opens tabs)
-    # This function handles the 5-second countdown internally
-    perform_clicks(row_count)
+    # 2. Countdown & Capture Original Page
+    print("\nIMPORTANT: Please switch to your browser NOW.")
+    print("Capturing 'Original Page' state in 5 seconds...")
+    for i in range(5, 0, -1):
+        print(f"{i}...", end="", flush=True)
+        time.sleep(1)
+    print(" Capturing...")
 
-    # 3. Extraction Loop
+    # Capture logic
+    pyautogui.hotkey('ctrl', 'a')
+    time.sleep(0.5)
+    pyautogui.hotkey('ctrl', 'c')
+    time.sleep(0.5)
+    orig_pg = pyperclip.paste().strip()
+    print("Original page captured. Starting Clicker sequence...")
+    
+    # 3. Perform Clicks
+    # Note: Clicker has its own small countdown, which is fine as a safety buffer
+    perform_clicks(click_count)
+
+    # 4. Extraction Loop
     print("\n--- Starting Extraction Loop ---")
+    print("Navigating to first tab...")
+    
+    # Move to the first opened tab (Forward navigation)
+    pyautogui.hotkey('ctrl', 'tab')
     
     collected_data = []
-    seen_ids = set() # For de-duplication
+    prev_tab_content = None
+    tab_index = 0
 
-    # We iterate through the tabs. 
-    # Since we are on the LAST tab opened, we process and then move to PREVIOUS.
-    for i in range(row_count):
-        print(f"Processing tab {i+1}/{row_count}...")
+    while True:
+        tab_index += 1
+        print(f"Processing tab {tab_index}...")
         
-        # A. Wait for content to render
+        # A. Wait for content
         time.sleep(PAGE_LOAD_WAIT)
 
-        # B. Copy Content (Ctrl+A, Ctrl+C)
+        # B. Copy Content
         pyautogui.hotkey('ctrl', 'a')
         time.sleep(0.5) 
         pyautogui.hotkey('ctrl', 'c')
-        time.sleep(0.5) # Wait for clipboard to update
+        time.sleep(0.5)
 
         # C. Get Text
-        raw_text = pyperclip.paste()
+        current_content = pyperclip.paste().strip()
 
-        # D. Parse
-        parsed_data = parse_invoice_text(raw_text)
-
-        # E. De-duplication Check
-        # We use the internal_id or invoice_number as a unique key
-        unique_key = parsed_data.get('internal_id')
-        if not unique_key or unique_key == "N/A":
-            unique_key = parsed_data.get('invoice_number')
+        # D. STOP CONDITION: Check if we are back at the original page
+        if current_content == orig_pg:
+            print(">> LOOP COMPLETE: Returned to original page.")
+            break
         
-        if unique_key and unique_key in seen_ids:
-            print(f"  -> Duplicate found ({unique_key}). Skipping.")
+        # E. DE-DUPLICATION: Check if this is same as previous tab (Fat Row)
+        if current_content == prev_tab_content:
+            print("  -> Duplicate found (Same as previous). Skipping.")
         else:
-            if unique_key:
-                seen_ids.add(unique_key)
+            # Parse and Store
+            parsed_data = parse_invoice_text(current_content)
             collected_data.append(parsed_data)
-            print(f"  -> Extracted: {parsed_data.get('invoice_number', 'Unknown')}")
+            inv_num = parsed_data.get('invoice_number', 'Unknown')
+            print(f"  -> Extracted: {inv_num}")
 
-        # F. Navigate to Previous Tab (Ctrl+Shift+Tab)
-        if i < row_count - 1: # Don't switch after the last one
-            pyautogui.hotkey('ctrl', 'shift', 'tab')
-            time.sleep(0.5)
+        # Update previous content tracker
+        prev_tab_content = current_content
 
-    # 4. Save Results
+        # F. Navigate Forward
+        pyautogui.hotkey('ctrl', 'tab')
+
+    # 5. Save Results
     if collected_data:
         saved_path = save_data(collected_data)
         print(f"\nSUCCESS! Data saved to:\n{saved_path}")
-        # Play success sound (System Bell)
-        print('\a')
+        print('\a') # System Bell
     else:
         print("\nNo unique data was extracted.")
 
