@@ -39,20 +39,26 @@ def click_at(x, y):
     pyautogui.keyUp('ctrl')
     print(f"Ctrl+Clicked at: ({round(x, 2)}, {round(y, 2)})")
 
+from config_manager import load_config
+
 def perform_clicks(num_clicks=23):
     """
-    Performs a series of human-like clicks in a vertical list.
+    Performs a series of human-like clicks in a vertical list using configured coordinates.
     """
-    # Parameters for clicking, updated from the simulation
-    x_min = 637
-    x_max = 1293
-    y_orig = 320
+    config = load_config()
+    
+    # Base coordinates from config
+    start_x = config.get("start_x", 0)
+    y_orig = config.get("start_y", 0)
+    row_height = config.get("vertical_spacing", 23.5)
+    
+    # Parameters for clicking
     y_margin = 6      # Max vertical offset for randomization
-    row_height = 23.5 # Vertical distance between rows
 
-    # X-axis logic from simulation
-    absolute_center_x = (x_min + x_max) / 2
-    randomized_session_center_x = absolute_center_x + random.uniform(-50, 50)
+    # X-axis logic
+    # We use the captured start_x as the center. 
+    # Add a small session-based random offset to the X center to vary slightly between runs.
+    randomized_session_center_x = start_x + random.uniform(-10, 10)
 
     # Standard deviations for normal distribution
     x_std_dev = 15
@@ -77,7 +83,7 @@ def perform_clicks(num_clicks=23):
 
         # Clamp y deviation to the max y_margin
         target_y = max(mean_y - y_margin, min(target_y, mean_y + y_margin))
-        # Clamp x deviation to the session click zone
+        # Clamp x deviation to the session click zone (e.g. +/- 50 pixels)
         target_x = max(mean_x - 50, min(target_x, mean_x + 50))
 
         # Perform the click

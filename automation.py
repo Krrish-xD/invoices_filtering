@@ -5,14 +5,16 @@ import tkinter as tk
 from tkinter import messagebox
 import pyautogui
 import pyperclip
+import beepy
 from clicker import perform_clicks
 from extractor import parse_invoice_text, format_to_csv_block
+from config_manager import load_config
 
 # Configuration
 OUTPUT_FILE = "extracted_data.csv"
 PAGE_LOAD_WAIT = 2.0  # Seconds to wait for a tab to load content
 
-def get_row_count():
+def get_row_count(default_count=20):
     """
     Opens a custom, larger GUI window to ask for the row count.
     """
@@ -24,13 +26,13 @@ def get_row_count():
     root.geometry("550x350")
     
     # Variable to store the result
-    result = {"count": 20} # Default
+    result = {"count": default_count}
 
     def on_submit(event=None):
         try:
             val = entry.get().strip()
             if not val:
-                result["count"] = 20 # Default if empty
+                result["count"] = default_count
             else:
                 result["count"] = int(val)
             root.destroy()
@@ -66,7 +68,7 @@ def get_row_count():
     lbl_prompt.pack(side="left", padx=10)
 
     entry = tk.Entry(frame_input, width=10, font=("Helvetica", 11))
-    entry.insert(0, "20") # Default value
+    entry.insert(0, str(default_count)) 
     entry.pack(side="left", padx=10)
     entry.bind('<Return>', on_submit) 
     entry.focus_set()
@@ -93,8 +95,12 @@ def save_data(all_data):
     return os.path.abspath(OUTPUT_FILE)
 
 def main():
+    # Load Config
+    config = load_config()
+    default_rows = config.get("row_count", 20)
+
     # 1. Get User Input
-    row_count = get_row_count()
+    row_count = get_row_count(default_rows)
     if not row_count:
         print("Operation cancelled.")
         return
@@ -120,18 +126,19 @@ def main():
     print("Original page captured. Starting Clicker sequence...")
     
     # 3. Perform Clicks
-    # Note: Clicker has its own small countdown, which is fine as a safety buffer
     perform_clicks(click_count)
 
     # 4. Extraction Loop
-    print("\n--- Starting Extraction Loop ---")
-    print("Navigating to first tab...")
+    print("\n--- Starting Extraction Loop (Reverse Order) ---")
+    print("Navigating to last tab...")
     
-    # Move to the first opened tab (Forward navigation)
-    pyautogui.hotkey('ctrl', 'tab')
+    # Move to the last opened tab (Reverse navigation)
+    # Assuming the clicker opened tabs in background, we are still on orig page.
+    # Ctrl+Shift+Tab once goes to the last tab.
+    pyautogui.hotkey('ctrl', 'shift', 'tab')
     
     collected_data = []
-    prev_tab_content = None
+    seen_content_set = set() # Global de-duplication
     tab_index = 0
 
     while True:
@@ -155,27 +162,31 @@ def main():
             print(">> LOOP COMPLETE: Returned to original page.")
             break
         
-        # E. DE-DUPLICATION: Check if this is same as previous tab (Fat Row)
-        if current_content == prev_tab_content:
-            print("  -> Duplicate found (Same as previous). Skipping.")
+        # E. DE-DUPLICATION: Check against ALL previously seen content
+        # We use a hash or a substring to check, but comparing full text is safer if memory allows.
+        if current_content in seen_content_set:
+            print("  -> Duplicate found (Seen before). Skipping.")
         else:
+            # Mark as seen
+            seen_content_set.add(current_content)
+            
             # Parse and Store
             parsed_data = parse_invoice_text(current_content)
             collected_data.append(parsed_data)
             inv_num = parsed_data.get('invoice_number', 'Unknown')
             print(f"  -> Extracted: {inv_num}")
 
-        # Update previous content tracker
-        prev_tab_content = current_content
-
-        # F. Navigate Forward
-        pyautogui.hotkey('ctrl', 'tab')
+        # F. Navigate Reverse (Previous Tab)
+        pyautogui.hotkey('ctrl', 'shift', 'tab')
 
     # 5. Save Results
     if collected_data:
         saved_path = save_data(collected_data)
         print(f"\nSUCCESS! Data saved to:\n{saved_path}")
-        print('\a') # System Bell
+        try:
+            beepy.beep(sound=1) # Default sound
+        except Exception as e:
+            print(f"Sound error: {e}")
     else:
         print("\nNo unique data was extracted.")
 
