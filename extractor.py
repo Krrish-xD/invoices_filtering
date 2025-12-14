@@ -87,7 +87,7 @@ def parse_invoice_text(text):
         return None
 
     # --- 1. Global Fields ---
-    status_match = re.search(r'\b(Void|Open|Paid|Draft|Uncollectible)\b', text, re.IGNORECASE)
+    status_match = re.search(r'\b(Void|Open|Paid|Draft|Uncollectible|Past\s+due)\b', text, re.IGNORECASE)
     data['status'] = status_match.group(1).title() if status_match else "Unknown"
     
     total_match = re.search(r'Total\s*\n\s*(\$[\d,]+\.\d{2})', text, re.MULTILINE)
