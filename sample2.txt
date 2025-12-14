@@ -1,0 +1,122 @@
+Skip to content
+Invoices
+C0PS2WV9-0003
+Open
+Billed to Servbank, N.A · $8,750.00
+https://invoice.stripe.com/i/acct_1PL7io02CU681TVB/live_YWNjdF8xUEw3aW8wMkNVNjgxVFZCLF9UWVltMU9FWjAyT0t5WlgyWjVNZGQ1dmxpVVA4MWpTLDE1NjIwOTY2OA0200sXw8MrNy?s=db
+Download PDF
+Recent activity
+Invoice was sent to sean.nagy@themoneysource.com and rishi@kastle.ai
+Dec 6, 2025, 1:00 PM
+Invoice was finalized
+Dec 6, 2025, 1:00 PM
+Invoice payment page was created
+Summary
+Billed to
+Servbank, N.A
+sean.nagy@themoneysource.com
+Billing details
+—
+Invoice number
+C0PS2WV9-0003
+Currency
+USD - US Dollar
+Due date
+Jan 5, 2026, 12:00 PM
+Billing method
+Send invoice
+Memo
+Tax calculation
+No tax rate applied
+Description
+Qty
+Unit price
+Amount
+Kastle AI Platform Subscription
+Dec 6, 2025 - Jan 6, 2026
+1
+$8,750.00
+$8,750.00
+Subtotal
+$8,750.00
+Total excluding tax
+$8,750.00
+Tax
+-
+Total
+$8,750.00
+Amount paid
+$0.00
+Amount remaining
+$8,750.00
+Tax calculation
+No tax rate applied.
+Learn how to calculate tax automatically on all your future subscriptions.
+Accounting
+Use Revenue Recognition to automate accrual accounting for invoices.
+
+Go to Revenue Recognition
+Payments
+Amount
+​
+​
+Description
+Date
+$8,750.00
+USD
+Incomplete
+Subscription update
+Dec 6, 1:00 PM
+Credit notes
+No credit notes
+When you add credit notes on this invoice, they will appear here.
+Logs
+No logs
+Events
+sean.nagy@themoneysource.com's invoice for $8,750.00 was sent
+12/6/25, 1:00:57 PM
+A draft invoice for $8,750.00 to sean.nagy@themoneysource.com was finalized
+12/6/25, 1:00:56 PM
+sean.nagy@themoneysource.com's invoice has changed
+12/6/25, 1:00:56 PM
+A new payment pi_3SbSb602CU681TVB1PmcycDO for $8,750.00 was created
+12/6/25, 1:00:56 PM
+A draft invoice was created
+12/6/25, 12:00:25 PM
+Details
+ID
+in_1SbReW02CU681TVBzCNk66Vy
+Created
+Dec 6, 12:00 PM
+Finalized
+Dec 6, 1:00 PM
+Payment page
+https://invoice.stripe.com/i/acct_1PL7io02CU681TVB/live_YWNjdF8xUEw3aW8wMkNVNjgxVFZCLF9UWVltMU9FWjAyT0t5WlgyWjVNZGQ1dmxpVVA4MWpTLDE1NjIwOTY2OA0200sXw8MrNy?s=db
+Enabled payment methods
+ACH direct debit
+Connected subscription
+Kastle AI Platform Subscription
+Active
+Metadata
+No metadata
+
+Kastle AI
+Home
+Balances
+Transactions
+Customers
+Product catalog
+Shortcuts
+Revenue recovery
+Reports
+Invoices
+Products
+Payments
+Billing
+Reporting
+More
+Search
+Test mode
+
+Developers
+in_1SbReW02CU681TVBz...

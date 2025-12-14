@@ -1,0 +1,139 @@
+Skip to content
+Invoices
+1RJXXWRK-0010
+Open
+Billed to Cardinal Financial Company Limited Partnership · $1,700.00
+https://invoice.stripe.com/i/acct_1PL7io02CU681TVB/live_YWNjdF8xUEw3aW8wMkNVNjgxVFZCLF9UVVdxb2RxYktzQ3VEdEs1YjVIWW5CWU1OV2dURWFuLDE1NjIwOTY3OQ0200eB0XApsy?s=db
+Download PDF
+Recent activity
+Invoice was finalized
+Nov 25, 2025, 5:45 PM
+Invoice payment page was created
+Summary
+Billed to
+Cardinal Financial Company Limited Partnership
+accounts.payable@sebonic.com
+Billing details
+—
+Invoice number
+1RJXXWRK-0010
+Currency
+USD - US Dollar
+Due date
+Dec 25, 5:45 PM
+Billing method
+Send invoice
+Memo
+Tax calculation
+No tax rate applied
+Description
+Qty
+Unit price
+Amount
+Kastle AI Platform Subscription
+Oct 21 - Nov 21, 2025
+1
+$1,000.00
+$1,000.00
+Aged Lead Transfers
+Oct 21 - Nov 21, 2025
+14
+$50.00
+$700.00
+Subtotal
+$1,700.00
+Total excluding tax
+$1,700.00
+Tax
+-
+Total
+$1,700.00
+Amount paid
+$0.00
+Amount remaining
+$1,700.00
+Tax calculation
+No tax rate applied.
+Learn how to calculate tax automatically on all your future invoices.
+Accounting
+Use Revenue Recognition to automate accrual accounting for invoices.
+
+Go to Revenue Recognition
+Payments
+Amount
+​
+​
+Description
+Date
+$1,700.00
+USD
+Incomplete
+Payment for Invoice
+Nov 25, 5:45 PM
+Credit notes
+No credit notes
+When you add credit notes on this invoice, they will appear here.
+Logs
+POST /v1/invoices/in_1SXXmz02CU681TVBNpri1fiO/finalize
+200 OK
+11/25/25, 5:45:47 PM
+POST /v1/invoices/in_1SXXmz02CU681TVBNpri1fiO
+200 OK
+11/25/25, 5:45:46 PM
+POST /v1/invoices/in_1SXXmz02CU681TVBNpri1fiO
+200 OK
+11/25/25, 5:45:44 PM
+Events
+A draft invoice for $1,700.00 to accounts.payable@sebonic.com was finalized
+11/25/25, 5:45:48 PM
+accounts.payable@sebonic.com's invoice has changed
+11/25/25, 5:45:48 PM
+A new payment pi_3SXXnk02CU681TVB0SyDrKiL for $1,700.00 was created
+11/25/25, 5:45:48 PM
+accounts.payable@sebonic.com's invoice has changed
+11/25/25, 5:45:47 PM
+accounts.payable@sebonic.com's invoice has changed
+11/25/25, 5:45:18 PM
+A draft invoice was created
+11/25/25, 5:45:01 PM
+An invoice item for $1,000.00 was created for ii_1SXXmz02CU681TVBtLHkbZQ2
+11/25/25, 5:45:01 PM
+An invoice item for $300.00 was created for ii_1SXXmz02CU681TVBh6uXAgbO
+11/25/25, 5:45:01 PM
+Details
+ID
+in_1SXXmz02CU681TVBNpri1fiO
+Created
+Nov 25, 5:45 PM
+Finalized
+Nov 25, 5:45 PM
+Payment page
+https://invoice.stripe.com/i/acct_1PL7io02CU681TVB/live_YWNjdF8xUEw3aW8wMkNVNjgxVFZCLF9UVVdxb2RxYktzQ3VEdEs1YjVIWW5CWU1OV2dURWFuLDE1NjIwOTY3OQ0200eB0XApsy?s=db
+Enabled payment methods
+Credit or debit card
+Cash App Pay
+Link
+ACH direct debit
+Metadata
+No metadata
+
+Kastle AI
+Home
+Balances
+Transactions
+Customers
+Product catalog
+Shortcuts
+Revenue recovery
+Reports
+Invoices
+Products
+Payments
+Billing
+Reporting
+More
+Search
+Test mode
+
+Developers
+in_1SXXmz02CU681TVBN...

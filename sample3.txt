@@ -1,0 +1,99 @@
+Skip to content
+Invoices
+1RJXXWRK-DRAFT
+Draft
+Billed to Cardinal Financial Company Limited Partnership · $1,000.00
+Recent activity
+Automatic collection for this invoice was turned off
+Nov 25, 2025, 4:32 PM
+Summary
+Billed to
+Cardinal Financial Company Limited Partnership
+accounts.payable@sebonic.com
+Billing details
+—
+Invoice number
+1RJXXWRK-DRAFT
+Currency
+USD - US Dollar
+Due date
+Dec 25, 4:23 PM
+Billing method
+Send invoice
+Memo
+Tax calculation
+No tax rate applied
+Description
+Qty
+Unit price
+Amount
+Kastle AI Platform Subscription
+Nov 25 - Dec 25, 2025
+1
+$1,000.00
+$1,000.00
+Subtotal
+$1,000.00
+Total excluding tax
+$1,000.00
+Tax
+-
+Total
+$1,000.00
+Amount paid
+$0.00
+Amount remaining
+$1,000.00
+Tax calculation
+No tax rate applied.
+Learn how to calculate tax automatically on all your future subscriptions.
+Accounting
+Use Revenue Recognition to automate accrual accounting for invoices.
+
+Go to Revenue Recognition
+Payments
+No payments yet
+When you add or receive payments on this invoice, they will appear here.
+Credit notes
+No credit notes
+When you add credit notes on this invoice, they will appear here.
+Logs
+POST /v1/invoices/in_1SXWVz02CU681TVBJEgXkrc2
+200 OK
+11/25/25, 4:32:06 PM
+Events
+accounts.payable@sebonic.com's invoice has changed
+11/25/25, 4:32:07 PM
+A draft invoice was created
+11/25/25, 4:23:23 PM
+Details
+ID
+in_1SXWVz02CU681TVBJEgXkrc2
+Created
+Nov 25, 4:23 PM
+Connected subscription
+Kastle AI Platform Subscription
+Active
+Metadata
+No metadata
+
+Kastle AI
+Home
+Balances
+Transactions
+Customers
+Product catalog
+Shortcuts
+Revenue recovery
+Reports
+Invoices
+Products
+Payments
+Billing
+Reporting
+More
+Search
+Test mode
+
+Developers
+in_1SXWVz02CU681TVBJ...
