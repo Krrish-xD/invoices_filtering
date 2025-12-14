@@ -1,0 +1,96 @@
+Skip to content
+Invoices
+9QMBVND4-DRAFT
+Draft
+Billed to Spring EQ, LLC · $10,000.00
+Recent activity
+Dec 11, 2025, 11:01 PM
+Summary
+Billed to
+Spring EQ, LLC
+snigam@springeq.com
+Billing details
+1 West Elm Street
+Suite 450
+Conshohocken, PA 19428 US
+Invoice number
+9QMBVND4-DRAFT
+Currency
+USD - US Dollar
+Due date
+Jan 10, 2026, 11:00 PM
+Billing method
+Send invoice
+Memo
+Tax calculation
+No tax rate applied
+Description
+Qty
+Unit price
+Amount
+Tier 1: Core Voice
+Dec 11, 2025 - Jan 11, 2026
+1
+$10,000.00
+$10,000.00
+Subtotal
+$10,000.00
+Total excluding tax
+$10,000.00
+Tax
+-
+Total
+$10,000.00
+Amount paid
+$0.00
+Amount remaining
+$10,000.00
+Tax calculation
+No tax rate applied.
+Learn how to calculate tax automatically on all your future subscriptions.
+Accounting
+Use Revenue Recognition to automate accrual accounting for invoices.
+
+Go to Revenue Recognition
+Payments
+No payments yet
+When you add or receive payments on this invoice, they will appear here.
+Credit notes
+No credit notes
+When you add credit notes on this invoice, they will appear here.
+Logs
+No logs
+Events
+A draft invoice was created
+12/11/25, 11:01:21 PM
+Details
+ID
+in_1SdQLt02CU681TVBwL91sKod
+Created
+Dec 11, 11:01 PM
+Connected subscription
+Tier 1: Core Voice
+Past due
+Metadata
+No metadata
+
+Kastle AI
+Home
+Balances
+Transactions
+Customers
+Product catalog
+Shortcuts
+Revenue recovery
+Reports
+Invoices
+Products
+Payments
+Billing
+Reporting
+More
+Search
+Test mode
+
+Developers
+in_1SdQLt02CU681TVBw...

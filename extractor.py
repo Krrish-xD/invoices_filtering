@@ -244,7 +244,7 @@ def format_to_csv_block(data):
 
 if __name__ == "__main__":
     # Test with sample files
-    files = ['sample1.txt', 'sample2.txt', 'sample3.txt']
+    files = ['sample1.txt', 'sample2.txt', 'sample3.txt', 'sample4.txt']
     for f_path in files:
         try:
             with open(f_path, 'r') as f:
