@@ -136,8 +136,8 @@ def run_automation_logic(row_count, logger=print):
 
                 if is_loaded:
                 # Immediate success if it matches original page (Stop condition)
-                if content == orig_pg:
-                    return content
+                    if content == orig_pg:
+                        return content
 
                 # Check for "Partial Load" (Too short or too few lines)
                 is_loaded = True
