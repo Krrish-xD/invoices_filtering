@@ -3,3 +3,4 @@ tests
 venv/
 *.pyc
 dist/
+build/
