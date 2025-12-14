@@ -53,7 +53,7 @@ def perform_clicks(num_clicks=23):
     row_height = config.get("vertical_spacing", 23.5)
     
     # Parameters for clicking
-    y_margin = 3      # Max vertical offset for randomization
+    y_margin = 0      # Max vertical offset for randomization
 
     # X-axis logic
     # We use the captured start_x as the center. 

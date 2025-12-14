@@ -100,7 +100,8 @@ def parse_invoice_text(text):
     # --- 2. Summary Fields (with Global Fallback) ---
     
     # Invoice Number
-    inv_match = extract_field(r'Invoice number\s*[\r\n]+([A-Z0-9-]+)', 'summary')
+    # Match newline OR (optional colon + spaces)
+    inv_match = extract_field(r'Invoice number\s*(?:[\r\n]+|:?\s+)([A-Z0-9-]+)', 'summary')
     data['invoice_number'] = inv_match.group(1) if inv_match else "N/A"
     
     # Due Date
