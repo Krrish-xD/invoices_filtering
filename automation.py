@@ -11,7 +11,7 @@ from config_manager import load_config
 
 # Configuration
 OUTPUT_FILE = "extracted_data.csv"
-PAGE_LOAD_WAIT = 2.0  # Seconds to wait for a tab to load content
+PAGE_LOAD_WAIT = 1.0  # Seconds to wait for a tab to load content
 
 def play_sound():
     """Plays a system beep using winsound (Windows-specific)."""
@@ -43,10 +43,10 @@ def perform_initial_tab_load(tab_count, logger=print):
         # Small delay to let the browser register the tab switch and start rendering
         time.sleep(0.3) 
         
-    logger("  [Init] Returning to first tab...")
-    # Jump to the first tab
-    pyautogui.hotkey('ctrl', '1')
-    time.sleep(0.8)
+    logger("  [Init] Returning to first tab, then moving to first invoice...")
+    # Jump to the first tab, then one forward to start
+    pyautogui.hotkey('ctrl', '2')
+    time.sleep(0.5)
 
 def run_automation_logic(row_count, logger=print):
     """
@@ -111,12 +111,27 @@ def run_automation_logic(row_count, logger=print):
                 
                 content = pyperclip.paste().strip()
                 
-                if content:
+                # Immediate success if it matches original page (Stop condition)
+                if content == orig_pg:
+                    return content
+
+                # Check for "Partial Load" (Too short or too few lines)
+                is_loaded = True
+                if not content:
+                    is_loaded = False
+                elif len(content) < 250:
+                    # logger(f"    (Content too short: {len(content)} chars)")
+                    is_loaded = False
+                elif content.count('\n') < 25:
+                    # logger(f"    (Too few lines: {content.count('\n')})")
+                    is_loaded = False
+
+                if is_loaded:
                     return content
                 
-                # If content is empty and we have delays left, wait and retry
+                # If content is invalid and we have delays left, wait and retry
                 if delay is not None:
-                    logger(f"  -> Page blank. Retrying in {delay}s (Attempt {attempt+1}/5)...")
+                    logger(f"  -> Page not fully loaded (Partial/Blank). Retrying in {delay}s (Attempt {attempt+1}/5)...")
                     time.sleep(delay)
             
             return "" # Give up
@@ -150,8 +165,18 @@ def run_automation_logic(row_count, logger=print):
                 inv_num = parsed_data.get('invoice_number', 'Unknown')
                 logger(f"  -> Extracted: {inv_num}")
                 
-        # F. Navigate Forward (Next Tab)
+        # F. Navigate Forward (Next Tab) with Wiggle (Forward 3, Back 2)
+        # Net movement: +1 (The immediate next tab)
+        # Purpose: Trigger loading of subsequent tabs
         pyautogui.hotkey('ctrl', 'tab')
+        time.sleep(0.2)
+        pyautogui.hotkey('ctrl', 'tab')
+        time.sleep(0.2)
+        pyautogui.hotkey('ctrl', 'tab')
+        time.sleep(0.2)
+        pyautogui.hotkey('ctrl', 'shift', 'tab')
+        time.sleep(0.2)
+        pyautogui.hotkey('ctrl', 'shift', 'tab')
         time.sleep(0.8) 
 
     # 5. Save Results

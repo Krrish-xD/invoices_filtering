@@ -104,7 +104,7 @@ def parse_invoice_text(text):
     data['invoice_number'] = inv_match.group(1) if inv_match else "N/A"
     
     # Due Date
-    due_match = extract_field(r'Due date\n(.+)', 'summary')
+    due_match = extract_field(r'Due date\s+(.+)', 'summary')
     if due_match:
         data['due_date'] = due_match.group(1).strip().replace(',', ' ')
     else:
@@ -117,17 +117,17 @@ def parse_invoice_text(text):
     # Billed To Name
     # This is tricky globally because "Billed to" might appear multiple times or be ambiguous.
     # We stick to block first, then try global "Billed to\nName" pattern.
-    billed_match = extract_field(r'Billed to\s*\n(.+)', 'summary')
+    billed_match = extract_field(r'Billed to\s+(.+)', 'summary')
     data['billed_to_name'] = billed_match.group(1).strip() if billed_match else "N/A"
     
     # Currency
-    curr_match = extract_field(r'Currency\n(.+)', 'summary')
+    curr_match = extract_field(r'Currency\s+(.+)', 'summary')
     data['currency'] = curr_match.group(1).strip() if curr_match else "N/A"
 
     # --- 3. Details Fields (with Global Fallback) ---
     
     # Internal ID
-    id_match = extract_field(r'ID\n(in_[a-zA-Z0-9]+)', 'details')
+    id_match = extract_field(r'ID\s+(in_[a-zA-Z0-9]+)', 'details')
     data['internal_id'] = id_match.group(1) if id_match else "N/A"
     
     # Dates
@@ -136,7 +136,7 @@ def parse_invoice_text(text):
     
     for key in target_dates:
         # Try finding "Key\nValue" pattern
-        date_match = extract_field(rf'{key}\n(.+)', 'details')
+        date_match = extract_field(rf'{key}\s+(.+)', 'details')
         if date_match:
             raw_date = date_match.group(1).strip()
             dates[key] = raw_date.replace(',', ' ')

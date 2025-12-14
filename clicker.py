@@ -3,7 +3,7 @@ import random
 import time
 
 def human_random(
-    base_delay=721, std_dev=81, min_delay=418, max_delay=1176,
+    base_delay=521, std_dev=81, min_delay=200, max_delay=1176,
     outlier_chance=0.16, outlier_factor=2.4, recursion_limit=100
 ):
     """
@@ -53,7 +53,7 @@ def perform_clicks(num_clicks=23):
     row_height = config.get("vertical_spacing", 23.5)
     
     # Parameters for clicking
-    y_margin = 6      # Max vertical offset for randomization
+    y_margin = 3      # Max vertical offset for randomization
 
     # X-axis logic
     # We use the captured start_x as the center. 
