@@ -31,6 +31,22 @@ def save_data(all_data):
     
     return os.path.abspath(OUTPUT_FILE)
 
+def perform_warmup_movements(logger=print):
+    """
+    Performs a sequence of tab switches to force the browser to pre-load adjacent tabs.
+    Action: Ctrl+Tab (x3) then Ctrl+Shift+Tab (x3).
+    """
+    logger("  [Warmup] Pre-loading adjacent tabs...")
+    # Move Forward 3 times
+    for _ in range(3):
+        pyautogui.hotkey('ctrl', 'tab')
+        time.sleep(0.1)
+    
+    # Move Backward 3 times (return to start)
+    for _ in range(3):
+        pyautogui.hotkey('ctrl', 'shift', 'tab')
+        time.sleep(0.1)
+
 def run_automation_logic(row_count, logger=print):
     """
     The main logic for the automation, callable from an external GUI.
@@ -58,23 +74,23 @@ def run_automation_logic(row_count, logger=print):
     logger("Original page captured. Starting Clicker sequence...")
     
     # 3. Perform Clicks
-    # Note: We might need to redirect clicker's print statements if we want them in the GUI too.
-    # For now, we trust the clicker to just do its job.
     perform_clicks(click_count)
 
     # 4. Extraction Loop
     logger("\n--- Starting Extraction Loop (Reverse Order) ---")
-    # Move to the first tab (Forward navigation)
+    
+    # Move to the first tab (Forward navigation) to start the sequence properly
     logger("Navigating to first tab...")
     pyautogui.hotkey('ctrl', 'tab')
-    time.sleep(0.8) # Pause after moving to new tab
+    time.sleep(0.8) 
     
+    # --- PRE-LOOP WARMUP ---
+    perform_warmup_movements(logger)
+
     collected_data = []
     seen_content_set = set() # Global de-duplication
     tab_index = 0
     
-    # Safety: Ensure we don't stop immediately if the first tab resembles the original
-    # or if we haven't actually moved yet.
     has_moved_past_start = False
 
     while True:
@@ -84,63 +100,66 @@ def run_automation_logic(row_count, logger=print):
         # A. Wait for content
         time.sleep(PAGE_LOAD_WAIT)
 
-        # B. Copy Content (With Retry Logic)
-        def capture_content():
-            pyautogui.hotkey('ctrl', 'a')
-            time.sleep(0.5) 
-            pyautogui.hotkey('ctrl', 'c')
-            time.sleep(0.5)
-            return pyperclip.paste().strip()
+        # B. Copy Content (With Progressive Retry Logic)
+        def capture_with_retries():
+            # Retry delays as requested
+            delays = [0.2, 0.4, 0.6, 0.8, 1.0]
+            
+            for attempt, delay in enumerate(delays + [None]): # + [None] for the final attempt
+                # Perform Copy
+                pyautogui.hotkey('ctrl', 'a')
+                time.sleep(0.5) 
+                pyautogui.hotkey('ctrl', 'c')
+                time.sleep(0.5)
+                
+                content = pyperclip.paste().strip()
+                
+                if content:
+                    return content
+                
+                # If content is empty and we have delays left, wait and retry
+                if delay is not None:
+                    logger(f"  -> Page blank. Retrying in {delay}s (Attempt {attempt+1}/5)...")
+                    time.sleep(delay)
+            
+            return "" # Give up
 
-        current_content = capture_content()
+        current_content = capture_with_retries()
 
-        # RETRY MECHANISM for blank pages
         if not current_content:
-            logger("  -> Page seems blank/loading. Waiting extra 2.5s...")
-            time.sleep(2.5)
-            current_content = capture_content()
-            if not current_content:
-                logger("  -> Still blank. Skipping this tab (might be not loaded).")
-                # We don't break, we just move on.
-                # But we should be careful not to trigger "Stop Condition" on a blank page if orig_pg wasn't blank.
-
-        # D. STOP CONDITION: Check if we are back at the original page
-        # We only check this if we are confident we have processed at least one unique tab 
-        # OR if we've gone through enough tabs (sanity check).
-        # But primarily, we check if content matches orig_pg.
+            logger("  -> Failed to capture content after 5 retries. Skipping tab.")
+            # We don't break, just continue to next iteration but perform warmup/nav first
         
+        # D. STOP CONDITION
         is_original_page = (current_content == orig_pg)
         
         if is_original_page:
             if not has_moved_past_start:
-                 # We are still seeing the original page content? 
-                 # Maybe the Ctrl+Tab didn't register? Or the first tab is a duplicate of the list?
-                 # We'll treat it as a duplicate for now but WON'T stop the loop yet.
                  logger("  -> Content matches Original Page, but strictly inside first few checks. Continuing...")
             else:
                 logger(">> LOOP COMPLETE: Returned to original page.")
                 break
         else:
-            # If we see content that is DIFFERENT from original, we mark that we have successfully left the start.
             has_moved_past_start = True
         
         # E. DE-DUPLICATION
         if current_content in seen_content_set:
             logger("  -> Duplicate found (Seen before). Skipping.")
         else:
-            # Mark as seen (Only if it's valid content)
             if current_content:
                 seen_content_set.add(current_content)
-                
-                # Parse and Store
                 parsed_data = parse_invoice_text(current_content)
                 collected_data.append(parsed_data)
                 inv_num = parsed_data.get('invoice_number', 'Unknown')
                 logger(f"  -> Extracted: {inv_num}")
+                
+        # --- POST-PROCESSING WARMUP ---
+        # Before moving to the next tab, trigger the warmup for upcoming pages
+        perform_warmup_movements(logger)
 
         # F. Navigate Forward (Next Tab)
         pyautogui.hotkey('ctrl', 'tab')
-        time.sleep(0.8) # Pause after moving to new tab
+        time.sleep(0.8) 
 
     # 5. Save Results
     if collected_data:
