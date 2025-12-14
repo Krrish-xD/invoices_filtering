@@ -9,17 +9,16 @@ def split_into_blocks(text):
     
     # Define primary markers for block starts
     # Pattern: (block_name, regex_for_start_of_block)
-    # Order is not strictly important for this approach, as we sort by position.
+    # relaxed to allow optional leading whitespace
     primary_markers = [
-        ('recent_activity', r'^Recent activity'),
-        ('summary', r'^Summary\n'),
-        ('description', r'^Description\s*\n\s*Qty'),
-        ('payments', r'^Payments'),
-        ('logs', r'^Logs'),
-        ('events', r'^Events'),
-        ('details', r'^Details\nID'),
-        ('metadata', r'^Metadata'),
-        # ('footer_kapsel', r'^Kastle AI') # REMOVED: Caused false positive with line items
+        ('recent_activity', r'^\s*Recent activity'),
+        ('summary', r'^\s*Summary\s*$'),
+        ('description', r'^\s*Description\s*\n\s*Qty'),
+        ('payments', r'^\s*Payments'),
+        ('logs', r'^\s*Logs'),
+        ('events', r'^\s*Events'),
+        ('details', r'^\s*Details\s*\n\s*ID'),
+        ('metadata', r'^\s*Metadata'),
     ]
     
     # Collect all marker positions and their names
@@ -48,8 +47,7 @@ def split_into_blocks(text):
         blocks[block_name] = text[start_idx:end_idx].strip()
         
     # --- Refine Details block ending ---
-    # The 'Details' block might be followed by 'Metadata', 'Kastle AI', or end of file
-    details_start_match = re.search(r'Details\nID', text, re.IGNORECASE | re.DOTALL)
+    details_start_match = re.search(r'Details\s*\n\s*ID', text, re.IGNORECASE | re.DOTALL)
     if details_start_match:
         potential_details_block = text[details_start_match.start():].strip()
         
@@ -58,110 +56,134 @@ def split_into_blocks(text):
         if next_header_match:
             blocks['details'] = potential_details_block[:next_header_match.start()].strip()
         else:
-            blocks['details'] = potential_details_block.strip() # Go till end if no subsequent header
+            blocks['details'] = potential_details_block.strip()
             
     return blocks
 
 
 def parse_invoice_text(text):
     """
-    Parses the raw text from a Stripe invoice page (Ctrl+A copy) using block-based extraction.
+    Parses the raw text from a Stripe invoice page (Ctrl+A copy) using block-based extraction
+    with global fallbacks.
     """
     blocks = split_into_blocks(text)
     data = {}
     
-    # --- 1. Header & Global Parsing (Status, Total, Link) ---
-    # Status can be floating, so check globally
+    # --- Helper: extract with fallback ---
+    
+    # --- Helper: extract with fallback ---
+    def extract_field(regex, block_name, global_fallback=True):
+        # 1. Try block
+        block_content = blocks.get(block_name, '')
+        match = re.search(regex, block_content, re.IGNORECASE)
+        if match:
+            return match
+            
+        # 2. Try global if requested
+        if global_fallback:
+            match = re.search(regex, text, re.IGNORECASE)
+            if match:
+                return match
+        return None
+
+    # --- 1. Global Fields ---
     status_match = re.search(r'\b(Void|Open|Paid|Draft|Uncollectible)\b', text, re.IGNORECASE)
     data['status'] = status_match.group(1).title() if status_match else "Unknown"
     
-    # Total Amount (can be in header or description section, best to check globally)
     total_match = re.search(r'Total\s*\n\s*(\$[\d,]+\.\d{2})', text, re.MULTILINE)
     data['total_amount'] = total_match.group(1) if total_match else "N/A"
     
-    # Payment Page Link (often in header)
+    # Payment Page Link (extracted for internal logic if needed, but not output to CSV)
     link_match = re.search(r'(https://invoice\.stripe\.com/i/[^\s]+)', text)
     data['payment_page'] = link_match.group(1) if link_match else "N/A"
 
-    # --- 2. Summary Block Parsing (Invoice #, Due Date, Billed To, Currency) ---
-    summary_text = blocks.get('summary', '')
+    # --- 2. Summary Fields (with Global Fallback) ---
     
     # Invoice Number
-    inv_match = re.search(r'Invoice number\n([A-Z0-9]+-\d{4,})', summary_text, re.IGNORECASE)
+    inv_match = extract_field(r'Invoice number\s*[\r\n]+([A-Z0-9-]+)', 'summary')
     data['invoice_number'] = inv_match.group(1) if inv_match else "N/A"
     
     # Due Date
-    due_match = re.search(r'Due date\n(.+)', summary_text, re.IGNORECASE)
+    due_match = extract_field(r'Due date\n(.+)', 'summary')
     if due_match:
         data['due_date'] = due_match.group(1).strip().replace(',', ' ')
     else:
         data['due_date'] = "N/A"
         
-    # Billed To Email
-    email_match = re.search(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', summary_text)
+    # Billed To Email (Global search is usually safer for emails)
+    email_match = re.search(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', text)
     data['billed_to_email'] = email_match.group(0) if email_match else "N/A"
     
-    # Billed To Name - "Billed to" in summary block has newline before name
-    billed_match = re.search(r'Billed to\n(.+)', summary_text, re.IGNORECASE)
+    # Billed To Name
+    # This is tricky globally because "Billed to" might appear multiple times or be ambiguous.
+    # We stick to block first, then try global "Billed to\nName" pattern.
+    billed_match = extract_field(r'Billed to\s*\n(.+)', 'summary')
     data['billed_to_name'] = billed_match.group(1).strip() if billed_match else "N/A"
     
     # Currency
-    curr_match = re.search(r'Currency\n(.+)', summary_text)
+    curr_match = extract_field(r'Currency\n(.+)', 'summary')
     data['currency'] = curr_match.group(1).strip() if curr_match else "N/A"
 
-    # --- 3. Details Block Parsing (ID, Dates) ---
-    details_text = blocks.get('details', '')
+    # --- 3. Details Fields (with Global Fallback) ---
     
     # Internal ID
-    id_match = re.search(r'ID\n(in_[a-zA-Z0-9]+)', details_text)
+    id_match = extract_field(r'ID\n(in_[a-zA-Z0-9]+)', 'details')
     data['internal_id'] = id_match.group(1) if id_match else "N/A"
     
-    # Dates from Details Block
+    # Dates
     dates = {}
-    # We explicitly look for these keys in the Details block
-    target_dates = ['Created', 'Finalized', 'Voided'] # 'Paid' removed as it's not a date here. 
+    target_dates = ['Created', 'Finalized', 'Voided']
     
     for key in target_dates:
-        # Regex: Key followed by newline, then value
-        match = re.search(rf'{key}\n(.+)', details_text, re.IGNORECASE)
-        if match:
-            raw_date = match.group(1).strip()
-            dates[key] = raw_date.replace(',', ' ') # Clean commas
+        # Try finding "Key\nValue" pattern
+        date_match = extract_field(rf'{key}\n(.+)', 'details')
+        if date_match:
+            raw_date = date_match.group(1).strip()
+            dates[key] = raw_date.replace(',', ' ')
             
-    # Add Due Date to dates dict for consistency in output if not N/A
     if data['due_date'] != 'N/A':
         dates['Due'] = data['due_date']
         
     data['dates'] = dates
 
     # --- 4. Description Block (Line Items) ---
+    # We strictly use the description block to avoid false positives from other tables
     desc_text = blocks.get('description', '')
+    if not desc_text:
+        # Fallback: try finding the header globally if block failed
+        start_marker = re.search(r'Description\s*\n\s*Qty\s*\n\s*Unit price\s*\n\s*Amount', text, re.IGNORECASE)
+        end_marker = re.search(r'\nSubtotal', text, re.IGNORECASE)
+        if start_marker and end_marker:
+             desc_text = text[start_marker.end():end_marker.start()]
+    
     items = []
-    
-    # Restoring the original logic for line item parsing
-    start_marker = re.search(r'Description\s*\n\s*Qty\s*\n\s*Unit price\s*\n\s*Amount', desc_text, re.IGNORECASE)
-    end_marker = re.search(r'\nSubtotal', desc_text, re.IGNORECASE)
-    
-    if start_marker and end_marker:
-        start_idx = start_marker.end()
-        end_idx = end_marker.start()
+    # If we have text (either from block or fallback), parse it
+    if desc_text:
+        # Basic parsing logic assuming 5 lines per item
+        # We need to be careful about not including the header itself if we grabbed it raw
+        # The block logic usually excludes the start marker, but let's be safe
         
-        # Ensure we are only grabbing text BETWEEN the markers
-        table_text = desc_text[start_idx:end_idx].strip()
-        lines = [line.strip() for line in table_text.split('\n') if line.strip()]
+        # Clean up lines
+        lines = [line.strip() for line in desc_text.split('\n') if line.strip()]
         
+        # Filter out header row if present (Description, Qty...)
+        if lines and lines[0].lower() == 'description':
+             # Skip the 4 header lines: Description, Qty, Unit price, Amount
+             lines = lines[4:] if len(lines) >= 4 else []
+
         chunk_size = 5
         for i in range(0, len(lines), chunk_size):
             chunk = lines[i:i+chunk_size]
             if len(chunk) == 5:
-                item = {
+                # Basic validation: Qty should be a number or resemble one
+                # to avoid parsing garbage
+                items.append({
                     'description': chunk[0],
                     'period': chunk[1],
                     'qty': chunk[2],
                     'unit_price': chunk[3],
                     'amount': chunk[4]
-                }
-                items.append(item)
+                })
     
     data['line_items'] = items
     
@@ -184,16 +206,15 @@ def format_to_csv_block(data):
     # Row 3: Financials
     lines.append(f"Total Amount, {data['total_amount']}, Currency, {data['currency']}")
     
-    # Row 4: IDs
-    lines.append(f"Internal ID, {data['internal_id']}, Payment Link, {data['payment_page']}")
+    # Row 4: IDs (Payment Link REMOVED)
+    lines.append(f"Internal ID, {data['internal_id']}")
     
     lines.append("")
     lines.append("IMPORTANT DATES")
     
     # Dynamic Date Table
     if data['dates']:
-        # Sort keys to have a consistent order
-        preferred_order = ['Created', 'Finalized', 'Sent', 'Due', 'Voided'] # 'Paid' removed from order
+        preferred_order = ['Created', 'Finalized', 'Sent', 'Due', 'Voided']
         sorted_keys = sorted(data['dates'].keys(), key=lambda k: preferred_order.index(k) if k in preferred_order else 99)
         
         header_row = ", ".join(sorted_keys)
@@ -217,7 +238,7 @@ def format_to_csv_block(data):
             
     lines.append("-" * 50)
     lines.append("") 
-    lines.append("") # Extra newlines as requested
+    lines.append("") 
     
     return "\n".join(lines)
 

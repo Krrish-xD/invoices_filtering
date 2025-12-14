@@ -117,7 +117,6 @@ class AutomationApp:
             self.config["extra_file_path"] = extra_path
             
             save_config(self.config)
-            messagebox.showinfo("Success", "Configuration saved!")
         except ValueError:
             messagebox.showerror("Error", "Row count must be a number.")
 

@@ -31,21 +31,22 @@ def save_data(all_data):
     
     return os.path.abspath(OUTPUT_FILE)
 
-def perform_warmup_movements(logger=print):
+def perform_initial_tab_load(tab_count, logger=print):
     """
-    Performs a sequence of tab switches to force the browser to pre-load adjacent tabs.
-    Action: Ctrl+Tab (x3) then Ctrl+Shift+Tab (x3).
+    Cycles through all opened tabs to trigger loading, then returns to the first tab.
     """
-    logger("  [Warmup] Pre-loading adjacent tabs...")
-    # Move Forward 3 times
-    for _ in range(3):
-        pyautogui.hotkey('ctrl', 'tab')
-        time.sleep(0.1)
+    logger(f"  [Init] cycling through {tab_count} tabs to trigger loading...")
     
-    # Move Backward 3 times (return to start)
-    for _ in range(3):
-        pyautogui.hotkey('ctrl', 'shift', 'tab')
-        time.sleep(0.1)
+    # Cycle through all tabs to load them
+    for i in range(tab_count):
+        pyautogui.hotkey('ctrl', 'tab')
+        # Small delay to let the browser register the tab switch and start rendering
+        time.sleep(0.3) 
+        
+    logger("  [Init] Returning to first tab...")
+    # Jump to the first tab
+    pyautogui.hotkey('ctrl', '1')
+    time.sleep(0.8)
 
 def run_automation_logic(row_count, logger=print):
     """
@@ -79,13 +80,9 @@ def run_automation_logic(row_count, logger=print):
     # 4. Extraction Loop
     logger("\n--- Starting Extraction Loop (Reverse Order) ---")
     
-    # Move to the first tab (Forward navigation) to start the sequence properly
-    logger("Navigating to first tab...")
-    pyautogui.hotkey('ctrl', 'tab')
-    time.sleep(0.8) 
-    
-    # --- PRE-LOOP WARMUP ---
-    perform_warmup_movements(logger)
+    # --- PRE-LOOP INITIALIZATION ---
+    # Trigger loading for ALL tabs before starting processing
+    perform_initial_tab_load(click_count, logger)
 
     collected_data = []
     seen_content_set = set() # Global de-duplication
@@ -153,10 +150,6 @@ def run_automation_logic(row_count, logger=print):
                 inv_num = parsed_data.get('invoice_number', 'Unknown')
                 logger(f"  -> Extracted: {inv_num}")
                 
-        # --- POST-PROCESSING WARMUP ---
-        # Before moving to the next tab, trigger the warmup for upcoming pages
-        perform_warmup_movements(logger)
-
         # F. Navigate Forward (Next Tab)
         pyautogui.hotkey('ctrl', 'tab')
         time.sleep(0.8) 
